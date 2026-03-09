@@ -122,7 +122,7 @@ router.get("/order/:orderId", orderController.getById)
  *     summary: Atualizar pedido
  *     tags:
  *       - Orders
- *     description: Atualiza os dados de um pedido existente (valor total e/ou data de criação).
+ *     description: Atualiza os dados de um pedido existente (valor total e/ou items).
  *     parameters:
  *       - in: path
  *         name: orderId
@@ -141,6 +141,20 @@ router.get("/order/:orderId", orderController.getById)
  *               valorTotal:
  *                 type: number
  *                 example: 15000
+ *               items:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     idItem:
+ *                       type: string
+ *                       example: "2434"
+ *                     quantidadeItem:
+ *                       type: number
+ *                       example: 2
+ *                     valorItem:
+ *                       type: number
+ *                       example: 1500
  *     responses:
  *       200:
  *         description: Pedido atualizado com sucesso

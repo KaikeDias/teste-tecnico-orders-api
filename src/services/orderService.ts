@@ -84,6 +84,7 @@ export const update = async (orderId: string, data: any) => {
   }
 
   const value = data.valorTotal
+  const creationDate = data.dataCriacao ? new Date(data.dataCriacao) : undefined
 
   const updateFields = []
   const updateValues = []
@@ -94,17 +95,38 @@ export const update = async (orderId: string, data: any) => {
     updateValues.push(value)
     paramCount++
   }
+  
+  if (updateFields.length > 0) {
+    updateValues.push(orderId)
 
-  if (updateFields.length === 0) {
-    return { orderId }
+    await pool.query(
+      `UPDATE orders SET ${updateFields.join(", ")} WHERE order_id = $${paramCount}`,
+      updateValues
+    )
   }
 
-  updateValues.push(orderId)
+  // Atualizar items se fornecidos
+  if (data.items && Array.isArray(data.items)) {
+    // Deletar items antigos
+    await pool.query(
+      "DELETE FROM items WHERE order_id = $1",
+      [orderId]
+    )
 
-  await pool.query(
-    `UPDATE orders SET ${updateFields.join(", ")} WHERE order_id = $${paramCount}`,
-    updateValues
-  )
+    // Inserir novos items
+    for (const item of data.items) {
+      await pool.query(
+        `INSERT INTO items (order_id, product_id, quantity, price)
+         VALUES ($1,$2,$3,$4)`,
+        [
+          orderId,
+          Number(item.idItem),
+          item.quantidadeItem,
+          item.valorItem
+        ]
+      )
+    }
+  }
 
   return { orderId }
 }
